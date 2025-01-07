@@ -184,6 +184,77 @@ Here are some example SQL queries to get started:
    WHERE PO.POSITION = 'PLANLAMA ŞEFİ';
    ```
 
+8. **Number of people currently working in each position and their average salaries:**
+   ```sql
+   SELECT PO.POSITION,
+   (SELECT COUNT(*) FROM PERSON WHERE PERSON.POSITIONID = PO.ID AND PERSON.OUTDATE IS NULL) AS PERSON_COUNT,
+   (SELECT AVG(SALARY) FROM PERSON  WHERE PERSON.POSITIONID = PO.ID AND PERSON.OUTDATE IS NULL) AS AVG_SALARY
+   FROM POSITION PO
+   ORDER BY 1;
+   ```
+
+   **Alternative Query:**
+   ```sql
+   SELECT
+   PO.POSITION,
+   COUNT(PE.ID),
+   AVG(PE.SALARY)
+   FROM PERSON PE
+   JOIN POSITION PO
+   ON PO.ID = PE.POSITIONID
+   WHERE PE.OUTDATE IS NULL
+   GROUP BY  PO.POSITION
+   ORDER BY 1;
+   ```
+
+9. **Number of personnel hired by year, based on gender:**
+   ```sql
+   SELECT YEAR(INDATE) YEAR,
+   SUM(CASE 
+   WHEN GENDER = 'E' THEN 1 ELSE 0
+   END) AS MALE_PERSON,
+   SUM(CASE 
+   WHEN GENDER = 'K' THEN 1 ELSE 0
+   END) AS FEMALE_PERSON
+   FROM PERSON
+   GROUP BY YEAR(INDATE)
+   ORDER BY 1;
+   ```
+
+   **Alternative Query:**
+   ```sql
+   SELECT 
+   DISTINCT
+   YEAR(P.INDATE) YEAR,
+   (SELECT COUNT(*) FROM PERSON WHERE GENDER = 'K' AND YEAR(INDATE) = YEAR(P.INDATE)) AS FEMALE_PERSON,
+   (SELECT COUNT(*) FROM PERSON WHERE GENDER = 'E' AND YEAR(INDATE) = YEAR(P.INDATE)) AS MALE_PERSON
+   FROM PERSON P
+   ORDER BY 1;
+   ```
+
+10. **Working duration of each personnel in months:**
+    ```sql
+    SELECT NAME_, INDATE, OUTDATE, 
+    CASE 
+    WHEN OUTDATE IS NULL THEN DATEDIFF(YY, INDATE, GETDATE()) 
+    ELSE DATEDIFF(YY, INDATE, OUTDATE)
+    END AS WORKING_TIME
+    FROM PERSON;
+    ```
+
+    **Alternative Query:**
+    ```sql
+    SELECT NAME_, INDATE, OUTDATE, 
+    DATEDIFF(MONTH, INDATE, GETDATE()) AS WORKING_TIME
+    FROM PERSON WHERE OUTDATE IS NULL
+    UNION ALL
+    SELECT NAME_, INDATE, OUTDATE, 
+    DATEDIFF(MONTH, INDATE, OUTDATE) AS WORKING_TIME
+    FROM PERSON WHERE OUTDATE IS NOT NULL;
+    ```
+
+
+
 ## Setup
 1. Create the database schema using your preferred SQL tool.
 2. Populate the tables with initial data.
