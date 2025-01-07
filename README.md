@@ -1,7 +1,6 @@
 # SQL HR Project README
 
 ## Project Overview
-
 This project is a simple SQL-based Human Resources (HR) management system. It contains the following main tables:
 
 - **DEPARTMENT**: Stores information about the different departments in the organization.
@@ -10,38 +9,30 @@ This project is a simple SQL-based Human Resources (HR) management system. It co
 - **POSITION**: Holds details about the job positions available within the organization.
 
 ## Key Features
-
 1. **Department Management**:
-
    - View department details.
    - Analyze employee distribution across departments.
 
 2. **Employee Information**:
-
    - Store personal and professional details of employees.
    - Retrieve employee data by department or position.
 
 3. **Position Details**:
-
    - Define and manage different job positions.
    - Track employees assigned to specific positions.
 
 4. **File Tracking**:
-
    - Maintain a record of HR-related files (e.g., contracts, performance reviews).
 
 ## Database Schema Creation
-
 Below are the SQL scripts to create the database and tables:
 
 1. **Create HR Database:**
-
    ```sql
    CREATE DATABASE HR;
    ```
 
 2. **Create DEPARTMENT Table:**
-
    ```sql
    CREATE TABLE DEPARTMENT (
        id INT PRIMARY KEY AUTO_INCREMENT,
@@ -50,7 +41,6 @@ Below are the SQL scripts to create the database and tables:
    ```
 
 3. **Create POSITION Table:**
-
    ```sql
    CREATE TABLE POSITION (
        id INT PRIMARY KEY AUTO_INCREMENT,
@@ -59,7 +49,6 @@ Below are the SQL scripts to create the database and tables:
    ```
 
 4. **Create FILES Table:**
-
    ```sql
    CREATE TABLE FILES (
        id INT PRIMARY KEY AUTO_INCREMENT,
@@ -68,7 +57,6 @@ Below are the SQL scripts to create the database and tables:
    ```
 
 5. **Create PERSON Table:**
-
    ```sql
    CREATE TABLE PERSON (
        id INT PRIMARY KEY AUTO_INCREMENT,
@@ -92,11 +80,9 @@ Below are the SQL scripts to create the database and tables:
    ```
 
 ## Example Queries
-
 Here are some example SQL queries to get started:
 
 1. **List all employees in a specific department:**
-
    ```sql
    SELECT *
    FROM PERSON
@@ -104,7 +90,6 @@ Here are some example SQL queries to get started:
    ```
 
 2. **Get details of employees holding a specific position:**
-
    ```sql
    SELECT p.name, po.position_name
    FROM PERSON p
@@ -113,7 +98,6 @@ Here are some example SQL queries to get started:
    ```
 
 3. **Count the number of employees in each department:**
-
    ```sql
    SELECT d.department_name AS department_name, COUNT(p.id) AS employee_count
    FROM DEPARTMENT d
@@ -122,15 +106,13 @@ Here are some example SQL queries to get started:
    ```
 
 4. **List of workers still working at the company:**
-
    ```sql
    SELECT *
    FROM PERSON
-   WHERE out_date IS NOT NULL;
+   WHERE out_date IS NULL;
    ```
 
 5. **Number of women and men currently working in the company by department:**
-
    ```sql
    SELECT DP.DEPARTMENT, PR.GENDER, COUNT(PR.ID) AS PERSON_COUNT 
    FROM PERSON PR
@@ -142,7 +124,6 @@ Here are some example SQL queries to get started:
    ```
 
    **Alternative Query:**
-
    ```sql
    SELECT 
    DP.DEPARTMENT, 
@@ -159,19 +140,60 @@ Here are some example SQL queries to get started:
    ORDER BY 1, 2;
    ```
 
-## Setup
+6. **Number of men and women currently working by department (detailed view):**
+   ```sql
+   SELECT DP.DEPARTMENT, 
+   SUM(CASE 
+       WHEN PR.GENDER = 'E' THEN 1 ELSE 0
+   END) AS MALE_PERSONCOUNT,
+   SUM(CASE 
+       WHEN PR.GENDER = 'K' THEN 1 ELSE 0
+   END) AS FEMALE_PERSON_COUNT 
+   FROM PERSON PR
+   JOIN DEPARTMENT DP 
+   ON PR.DEPARTMENTID = DP.ID
+   WHERE PR.OUTDATE IS NULL
+   GROUP BY DP.DEPARTMENT
+   ORDER BY 1;
+   ```
 
+   **Alternative Query:**
+   ```sql
+   SELECT *,
+   (SELECT COUNT(*) FROM PERSON WHERE GENDER = 'K' AND PERSON.DEPARTMENTID = DP.ID AND OUTDATE IS NULL) AS FEMALE_PERSONCOUNT,
+   (SELECT COUNT(*) FROM PERSON WHERE GENDER = 'E' AND PERSON.DEPARTMENTID = DP.ID AND OUTDATE IS NULL) AS MALE_PERSONCOUNT 
+   FROM DEPARTMENT DP
+   ORDER BY 1;
+   ```
+
+7. **Salary analysis for the Planning Department's head position:**
+   ```sql
+   SELECT 'PLANLAMA_SEFI' AS POSITION, MIN(SALARY) MIN_SALARY, MAX(SALARY) MAX_SALARY, ROUND(AVG(SALARY), 0) AVG_SALARY 
+   FROM PERSON 
+   WHERE POSITIONID = 25;
+   ```
+
+   **Alternative Query:**
+   ```sql
+   SELECT 
+   PO.POSITION,
+   (SELECT MIN(SALARY) FROM PERSON WHERE POSITIONID = PO.ID) AS MIN_SALARY,
+   (SELECT MAX(SALARY) FROM PERSON WHERE POSITIONID = PO.ID) AS MAX_SALARY,
+   (SELECT AVG(SALARY) FROM PERSON WHERE POSITIONID = PO.ID) AS AVG_SALARY
+   FROM POSITION PO
+   WHERE PO.POSITION = 'PLANLAMA ŞEFİ';
+   ```
+
+## Setup
 1. Create the database schema using your preferred SQL tool.
 2. Populate the tables with initial data.
 3. Use the provided queries or write your own to interact with the data.
 
 ## Future Enhancements
-
 - Add tables for payroll management.
 - Implement performance tracking.
 - Integrate with external tools for analytics and reporting.
 
 ## Contact
-
 For questions or contributions, please contact [Your Name] at [Your Email Address].
 
